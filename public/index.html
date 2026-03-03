@@ -165,10 +165,14 @@
   </section>
 
   <script>
-    const API = window.location.origin;
+    const API_ORIGIN = window.location.origin;
+    const USE_API_PREFIX = !API_ORIGIN.includes('localhost:3001');
 
     async function api(path, opts = {}) {
-      const res = await fetch(API + path, {
+      const apiPath = USE_API_PREFIX
+        ? (path.startsWith('/api') ? path : '/api' + path)
+        : path;
+      const res = await fetch(API_ORIGIN + apiPath, {
         headers: { 'Content-Type': 'application/json', ...opts.headers },
         ...opts,
       });
