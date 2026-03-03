@@ -4,8 +4,9 @@ import {
   contractorWorkCategories,
   type ContractorWorkCategory,
 } from '../config/workCategories';
+import { getDataDir } from './dataDir';
 
-const DATA_DIR = join(process.cwd(), 'data');
+const DATA_DIR = getDataDir();
 const DATA_FILE = join(DATA_DIR, 'contractor-work-categories.json');
 
 async function ensureDataFileExists(): Promise<void> {

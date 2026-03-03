@@ -6,8 +6,9 @@ import {
   type ContractorExpense,
   type ContractorExpenseCreate,
 } from '../domain/contractorExpense';
+import { getDataDir } from './dataDir';
 
-const DATA_DIR = join(process.cwd(), 'data');
+const DATA_DIR = getDataDir();
 const DATA_FILE = join(DATA_DIR, 'contractor-expenses.json');
 
 async function ensureDataFileExists(): Promise<void> {
