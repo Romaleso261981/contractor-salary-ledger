@@ -30,13 +30,25 @@ async function readAll(): Promise<ContractorWorkCategory[]> {
   if (!raw.trim()) return [...contractorWorkCategories];
   const parsed = JSON.parse(raw) as unknown;
   const array = Array.isArray(parsed) ? parsed : [];
-  return array.filter(
+  const fileCategories = array.filter(
     (item): item is ContractorWorkCategory =>
       typeof item === 'object' &&
       item !== null &&
       typeof (item as ContractorWorkCategory).id === 'string' &&
       typeof (item as ContractorWorkCategory).name === 'string'
   );
+  const byId = new Map<string, ContractorWorkCategory>();
+  // базовые категории из коду
+  for (const cat of contractorWorkCategories) {
+    byId.set(cat.id, cat);
+  }
+  // категории из файла (новые/добавленные)
+  for (const cat of fileCategories) {
+    if (!byId.has(cat.id)) {
+      byId.set(cat.id, cat);
+    }
+  }
+  return Array.from(byId.values());
 }
 
 async function writeAll(

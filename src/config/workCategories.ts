@@ -11,6 +11,7 @@ export const contractorWorkCategories: ContractorWorkCategory[] = [
   { id: 'ladyzhyn-hospital', name: 'Ладижин лікарня' },
   { id: 'vkvk', name: 'ВКВК' },
   { id: 'sensor-installation', name: 'Влаштування дачиків' },
-   { id: 'air-conditioners', name: 'Кондиціонери' },
+  { id: 'air-conditioners', name: 'Кондиціонери' },
+  { id: 'bio-gas', name: 'Біогаз' },
 ];
 
