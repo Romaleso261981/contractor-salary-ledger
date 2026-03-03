@@ -1,421 +1,579 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Облік зарплати підрядників</title>
-  <style>
-    :root {
-      --bg: #0f1419;
-      --surface: #1a2332;
-      --border: #2d3a4d;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --accent: #58a6ff;
-      --success: #3fb950;
-      --danger: #f85149;
-    }
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 1.5rem;
-      line-height: 1.5;
-    }
-    h1 { font-size: 1.5rem; margin: 0 0 1.5rem; color: var(--text); }
-    h2 { font-size: 1.1rem; margin: 0 0 0.75rem; color: var(--muted); font-weight: 600; }
-    section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-bottom: 1.25rem;
-    }
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-    .summary-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1rem;
-    }
-    .summary-card .name { font-weight: 600; margin-bottom: 0.5rem; }
-    .summary-card .row { display: flex; justify-content: space-between; margin-top: 0.25rem; font-size: 0.9rem; }
-    .summary-card .earnings { color: var(--success); }
-    .summary-card .expenses { color: var(--danger); }
-    .summary-card .balance { font-weight: 600; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); }
-    .summary-card .balance.positive { color: var(--success); }
-    .summary-card .balance.negative { color: var(--danger); }
-    form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; }
-    label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
-    input, select, button {
-      font: inherit;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--bg);
-      color: var(--text);
-    }
-    input:focus, select:focus { outline: none; border-color: var(--accent); }
-    button {
-      cursor: pointer;
-      background: var(--accent);
-      color: var(--bg);
-      border: none;
-      font-weight: 500;
-    }
-    button:hover { opacity: 0.9; }
-    button.danger { background: var(--danger); color: #fff; padding: 0.35rem 0.6rem; font-size: 0.85rem; white-space: nowrap; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
-    th, td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
-    th { color: var(--muted); font-weight: 500; }
-    .amount { font-variant-numeric: tabular-nums; }
-    .error { color: var(--danger); font-size: 0.9rem; margin-top: 0.5rem; }
-    .loading { color: var(--muted); }
-    @media (max-width: 600px) {
-      body {
-        padding: 0.75rem;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Облік зарплати підрядників</title>
+    <style>
+      :root {
+        --bg: #0f1419;
+        --surface: #1a2332;
+        --border: #2d3a4d;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --accent: #58a6ff;
+        --success: #3fb950;
+        --danger: #f85149;
       }
-      section {
-        padding: 1rem;
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 1.5rem;
+        line-height: 1.5;
       }
       h1 {
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        margin: 0 0 1.5rem;
+        color: var(--text);
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin: 0 0 0.75rem;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
       }
       .summary-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .summary-card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 1rem;
+      }
+      .summary-card .name {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      .summary-card .row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.25rem;
+        font-size: 0.9rem;
+      }
+      .summary-card .earnings {
+        color: var(--success);
+      }
+      .summary-card .expenses {
+        color: var(--danger);
+      }
+      .summary-card .balance {
+        font-weight: 600;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+      }
+      .summary-card .balance.positive {
+        color: var(--success);
+      }
+      .summary-card .balance.negative {
+        color: var(--danger);
       }
       form {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: flex-end;
+        margin-bottom: 1rem;
       }
       label {
-        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        color: var(--muted);
       }
       input,
       select,
       button {
-        width: 100%;
+        font: inherit;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      button {
+        cursor: pointer;
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        font-weight: 500;
+      }
+      button:hover {
+        opacity: 0.9;
       }
       button.danger {
-        width: auto;
-      }
-      #work-list,
-      #expense-list {
-        overflow-x: auto;
+        background: var(--danger);
+        color: #fff;
+        padding: 0.35rem 0.6rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
       }
       table {
-        font-size: 0.8rem;
-        min-width: 480px;
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        table-layout: fixed;
       }
       th,
       td {
-        padding: 0.4rem 0.5rem;
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
       }
-    }
-  </style>
-</head>
-<body>
-  <h1>Облік зарплати підрядників</h1>
-
-  <section>
-    <h2>Сводка по підрядниках</h2>
-    <p class="muted" style="color: var(--muted); font-size: 0.9rem;">Заробіток з робіт мінус видані кошти = залишок зарплати.</p>
-    <div id="summary" class="summary-grid"></div>
-  </section>
-
-  <section>
-    <h2>Додати роботу (дохід)</h2>
-    <form id="form-work">
-      <label>Опис роботи <input type="text" name="description" required placeholder="Що зроблено" /></label>
-      <label>Категорія <select name="categoryIds" id="work-category"></select></label>
-      <label>Дата роботи <input type="date" name="workDate" /></label>
-      <label>Сума (грн) <input type="number" name="amountPaid" min="0" step="0.01" required placeholder="0" /></label>
-      <label>Валюта <input type="text" name="currency" value="UAH" placeholder="UAH" /></label>
-      <button type="submit">Додати</button>
-    </form>
-    <h2 style="font-size: 1rem; margin-top: 0;">Керування категоріями</h2>
-    <form id="form-category">
-      <label>Нова категорія <input type="text" name="name" required placeholder="Наприклад, новий об'єкт" /></label>
-      <button type="submit">Додати категорію</button>
-    </form>
-    <div id="category-error" class="error"></div>
-    <div id="work-error" class="error"></div>
-    <h2>Записи про роботи</h2>
-    <div id="work-list"></div>
-  </section>
-
-  <section>
-    <h2>Додати видачу коштів (витрата)</h2>
-    <form id="form-expense">
-      <label>Сума (грн) <input type="number" name="amount" min="0" step="0.01" required placeholder="0" /></label>
-      <label>Дата видачі коштів <input type="date" name="expenseDate" /></label>
-      <label>Опис <input type="text" name="description" required placeholder="напр. переказ на картку, видача в офісі" /></label>
-      <button type="submit">Додати витрату</button>
-    </form>
-    <div id="expense-error" class="error"></div>
-    <h2>Витрати</h2>
-    <div id="expense-list"></div>
-  </section>
-
-  <script>
-    const API_ORIGIN = window.location.origin;
-    const USE_API_PREFIX = !API_ORIGIN.includes('localhost:3001');
-
-    async function api(path, opts = {}) {
-      const apiPath = USE_API_PREFIX
-        ? (path.startsWith('/api') ? path : '/api' + path)
-        : path;
-      const res = await fetch(API_ORIGIN + apiPath, {
-        headers: { 'Content-Type': 'application/json', ...opts.headers },
-        ...opts,
-      });
-      if (res.status === 204) return null;
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || res.statusText);
-      return data;
-    }
-
-    function showError(id, msg) {
-      const el = document.getElementById(id);
-      el.textContent = msg || '';
-    }
-
-    async function loadCategories() {
-      const list = await api('/work-categories');
-      const sel = document.getElementById('work-category');
-      sel.innerHTML = list.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    }
-
-    async function loadSummary() {
-      const root = document.getElementById('summary');
-      const [workRecords, expenses] = await Promise.all([
-        api('/work-records'),
-        api('/expenses'),
-      ]);
-
-      const byContractor = {};
-
-      for (const record of workRecords) {
-        const contractorName = record.contractorName || 'Працівник';
-        let row = byContractor[contractorName];
-        if (!row) {
-          row = {
-            earnings: 0,
-            expenses: 0,
-            balance: 0,
-            currency: record.currency || 'UAH',
-          };
-          byContractor[contractorName] = row;
+      th {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .amount {
+        font-variant-numeric: tabular-nums;
+      }
+      .error {
+        color: var(--danger);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+      .loading {
+        color: var(--muted);
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 0.75rem;
         }
-        row.earnings += Number(record.amountPaid) || 0;
-      }
-
-      for (const expense of expenses) {
-        const contractorName = expense.contractorName || 'Працівник';
-        let row = byContractor[contractorName];
-        if (!row) {
-          row = { earnings: 0, expenses: 0, balance: 0, currency: 'UAH' };
-          byContractor[contractorName] = row;
+        section {
+          padding: 1rem;
         }
-        row.expenses += Number(expense.amount) || 0;
-      }
-
-      const list = Object.entries(byContractor).map(
-        ([contractorName, data]) => {
-          const earnings = Number(data.earnings) || 0;
-          const expensesTotal = Number(data.expenses) || 0;
-          const balance = earnings - expensesTotal;
-          const currency = data.currency || 'UAH';
-          return {
-            contractorName,
-            earnings,
-            expenses: expensesTotal,
-            balance,
-            currency,
-          };
+        h1 {
+          font-size: 1.25rem;
+          margin-bottom: 1rem;
         }
-      );
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+        form {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        label {
+          width: 100%;
+        }
+        input,
+        select,
+        button {
+          width: 100%;
+        }
+        button.danger {
+          width: auto;
+        }
+        #work-list,
+        #expense-list {
+          overflow-x: auto;
+        }
+        table {
+          font-size: 0.8rem;
+          min-width: 480px;
+        }
+        th,
+        td {
+          padding: 0.4rem 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Облік зарплати підрядників</h1>
 
-      if (!list.length) {
-        root.innerHTML =
-          '<p class="loading">Немає даних. Додайте роботи або витрати.</p>';
-        return;
+    <section>
+      <h2>Сводка по підрядниках</h2>
+      <p class="muted" style="color: var(--muted); font-size: 0.9rem">
+        Заробіток з робіт мінус видані кошти = залишок зарплати.
+      </p>
+      <div id="summary" class="summary-grid"></div>
+    </section>
+
+    <section>
+      <h2>Додати роботу (дохід)</h2>
+      <form id="form-work">
+        <label
+          >Опис роботи
+          <input
+            type="text"
+            name="description"
+            required
+            placeholder="Що зроблено"
+        /></label>
+        <label
+          >Категорія
+          <select name="categoryIds" id="work-category"></select
+        ></label>
+        <label>Дата роботи <input type="date" name="workDate" /></label>
+        <label
+          >Сума (грн)
+          <input
+            type="number"
+            name="amountPaid"
+            min="0"
+            step="0.01"
+            required
+            placeholder="0"
+        /></label>
+        <label
+          >Валюта
+          <input type="text" name="currency" value="UAH" placeholder="UAH"
+        /></label>
+        <button type="submit">Додати</button>
+      </form>
+      <h2 style="font-size: 1rem; margin-top: 0">Керування категоріями</h2>
+      <form id="form-category">
+        <label
+          >Нова категорія
+          <input
+            type="text"
+            name="name"
+            required
+            placeholder="Наприклад, новий об'єкт"
+        /></label>
+        <button type="submit">Додати категорію</button>
+      </form>
+      <div id="category-error" class="error"></div>
+      <div id="work-error" class="error"></div>
+      <h2>Записи про роботи</h2>
+      <div id="work-list"></div>
+    </section>
+
+    <section>
+      <h2>Додати видачу коштів (витрата)</h2>
+      <form id="form-expense">
+        <label
+          >Сума (грн)
+          <input
+            type="number"
+            name="amount"
+            min="0"
+            step="0.01"
+            required
+            placeholder="0"
+        /></label>
+        <label
+          >Дата видачі коштів <input type="date" name="expenseDate"
+        /></label>
+        <label
+          >Опис
+          <input
+            type="text"
+            name="description"
+            required
+            placeholder="напр. переказ на картку, видача в офісі"
+        /></label>
+        <button type="submit">Додати витрату</button>
+      </form>
+      <div id="expense-error" class="error"></div>
+      <h2>Витрати</h2>
+      <div id="expense-list"></div>
+    </section>
+
+    <script>
+      const API_ORIGIN = window.location.origin;
+      const USE_API_PREFIX = !API_ORIGIN.includes("localhost:3001");
+
+      async function api(path, opts = {}) {
+        const apiPath = USE_API_PREFIX
+          ? path.startsWith("/api")
+            ? path
+            : "/api" + path
+          : path;
+        const res = await fetch(API_ORIGIN + apiPath, {
+          headers: { "Content-Type": "application/json", ...opts.headers },
+          ...opts,
+        });
+        if (res.status === 204) return null;
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || res.statusText);
+        return data;
       }
 
-      root.innerHTML = list
-        .map(({ contractorName, earnings, expenses, balance, currency }) => {
-          const cls = balance >= 0 ? 'positive' : 'negative';
-          return `
+      function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg || "";
+      }
+
+      async function loadCategories() {
+        const list = await api("/work-categories");
+        const sel = document.getElementById("work-category");
+        sel.innerHTML = list
+          .map((c) => `<option value="${c.id}">${c.name}</option>`)
+          .join("");
+      }
+
+      async function loadSummary() {
+        const root = document.getElementById("summary");
+        const [workRecords, expenses] = await Promise.all([
+          api("/work-records"),
+          api("/expenses"),
+        ]);
+
+        const byContractor = {};
+
+        for (const record of workRecords) {
+          const contractorName = record.contractorName || "Працівник";
+          let row = byContractor[contractorName];
+          if (!row) {
+            row = {
+              earnings: 0,
+              expenses: 0,
+              balance: 0,
+              currency: record.currency || "UAH",
+            };
+            byContractor[contractorName] = row;
+          }
+          row.earnings += Number(record.amountPaid) || 0;
+        }
+
+        for (const expense of expenses) {
+          const contractorName = expense.contractorName || "Працівник";
+          let row = byContractor[contractorName];
+          if (!row) {
+            row = { earnings: 0, expenses: 0, balance: 0, currency: "UAH" };
+            byContractor[contractorName] = row;
+          }
+          row.expenses += Number(expense.amount) || 0;
+        }
+
+        const list = Object.entries(byContractor).map(
+          ([contractorName, data]) => {
+            const earnings = Number(data.earnings) || 0;
+            const expensesTotal = Number(data.expenses) || 0;
+            const balance = earnings - expensesTotal;
+            const currency = data.currency || "UAH";
+            return {
+              contractorName,
+              earnings,
+              expenses: expensesTotal,
+              balance,
+              currency,
+            };
+          },
+        );
+
+        if (!list.length) {
+          root.innerHTML =
+            '<p class="loading">Немає даних. Додайте роботи або витрати.</p>';
+          return;
+        }
+
+        root.innerHTML = list
+          .map(({ contractorName, earnings, expenses, balance, currency }) => {
+            const cls = balance >= 0 ? "positive" : "negative";
+            return `
           <div class="summary-card">
             <div class="name">${escapeHtml(contractorName)}</div>
             <div class="row earnings">Заробіток: ${formatMoney(
-              earnings
+              earnings,
             )} ${currency}</div>
             <div class="row expenses">Витрати: ${formatMoney(
-              expenses
+              expenses,
             )} ${currency}</div>
             <div class="row balance ${cls}">Залишок: ${formatMoney(
-              balance
+              balance,
             )} ${currency}</div>
           </div>`;
-        })
-        .join('');
-    }
-
-    async function loadWorkRecords() {
-      const list = await api('/work-records');
-      const root = document.getElementById('work-list');
-      if (!list.length) {
-        root.innerHTML = '<p class="loading">Немає записів.</p>';
-        return;
+          })
+          .join("");
       }
-      root.innerHTML = `
+
+      async function loadWorkRecords() {
+        const list = await api("/work-records");
+        const root = document.getElementById("work-list");
+        if (!list.length) {
+          root.innerHTML = '<p class="loading">Немає записів.</p>';
+          return;
+        }
+        root.innerHTML = `
         <table>
           <thead><tr><th>Опис</th><th>Категорія</th><th>Сума</th><th>Дата</th><th></th></tr></thead>
           <tbody>
-            ${list.map(r => `
+            ${list
+              .map(
+                (r) => `
               <tr>
                 <td>${escapeHtml(r.description)}</td>
-                <td>${(r.categoryIds || []).join(', ')}</td>
+                <td>${(r.categoryIds || []).join(", ")}</td>
                 <td class="amount">${formatMoney(r.amountPaid)} ${r.currency}</td>
                 <td>${formatDate(r.workDate || r.createdAt)}</td>
                 <td><button class="danger" data-id="${r.id}" data-type="work">Видалити</button></td>
               </tr>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </tbody>
         </table>`;
-    }
-
-    async function loadExpenses() {
-      const list = await api('/expenses');
-      const root = document.getElementById('expense-list');
-      if (!list.length) {
-        root.innerHTML = '<p class="loading">Немає витрат.</p>';
-        return;
       }
-      root.innerHTML = `
+
+      async function loadExpenses() {
+        const list = await api("/expenses");
+        const root = document.getElementById("expense-list");
+        if (!list.length) {
+          root.innerHTML = '<p class="loading">Немає витрат.</p>';
+          return;
+        }
+        root.innerHTML = `
         <table>
           <thead><tr><th>Сума</th><th>Опис</th><th>Дата</th><th></th></tr></thead>
           <tbody>
-            ${list.map(e => `
+            ${list
+              .map(
+                (e) => `
               <tr>
                 <td class="amount">${formatMoney(e.amount)}</td>
                 <td>${escapeHtml(e.description)}</td>
                 <td>${formatDate(e.expenseDate || e.createdAt)}</td>
                 <td><button class="danger" data-id="${e.id}" data-type="expense">Видалити</button></td>
               </tr>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </tbody>
         </table>`;
-    }
+      }
 
-    function escapeHtml(s) {
-      const div = document.createElement('div');
-      div.textContent = s;
-      return div.innerHTML;
-    }
-    function formatMoney(n) { return Number(n).toLocaleString('uk-UA', { minimumFractionDigits: 2 }); }
-    function formatDate(iso) { return new Date(iso).toLocaleDateString('uk-UA'); }
+      function escapeHtml(s) {
+        const div = document.createElement("div");
+        div.textContent = s;
+        return div.innerHTML;
+      }
+      function formatMoney(n) {
+        return Number(n).toLocaleString("uk-UA", { minimumFractionDigits: 2 });
+      }
+      function formatDate(iso) {
+        return new Date(iso).toLocaleDateString("uk-UA");
+      }
 
-    async function refresh() {
-      await Promise.all([loadSummary(), loadWorkRecords(), loadExpenses()]);
-    }
+      async function refresh() {
+        await Promise.all([loadSummary(), loadWorkRecords(), loadExpenses()]);
+      }
 
-    document.getElementById('form-work').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      showError('work-error', '');
-      const fd = new FormData(e.target);
-      const categoryIds = [fd.get('categoryIds')].filter(Boolean);
-      const workDate = fd.get('workDate');
-      try {
-        await api('/work-records', {
-          method: 'POST',
-          body: JSON.stringify({
-            contractorName: 'Працівник',
-            description: fd.get('description'),
-            categoryIds,
-            amountPaid: Number(fd.get('amountPaid')),
-            currency: fd.get('currency') || 'UAH',
-            conditionsNotes: '',
-            workDate: workDate ? String(workDate) : new Date().toISOString().slice(0, 10),
-          }),
+      document
+        .getElementById("form-work")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          showError("work-error", "");
+          const fd = new FormData(e.target);
+          const categoryIds = [fd.get("categoryIds")].filter(Boolean);
+          const workDate = fd.get("workDate");
+          try {
+            await api("/work-records", {
+              method: "POST",
+              body: JSON.stringify({
+                contractorName: "Працівник",
+                description: fd.get("description"),
+                categoryIds,
+                amountPaid: Number(fd.get("amountPaid")),
+                currency: fd.get("currency") || "UAH",
+                conditionsNotes: "",
+                workDate: workDate
+                  ? String(workDate)
+                  : new Date().toISOString().slice(0, 10),
+              }),
+            });
+            e.target.reset();
+            await refresh();
+          } catch (err) {
+            showError("work-error", err.message);
+          }
         });
-        e.target.reset();
-        await refresh();
-      } catch (err) {
-        showError('work-error', err.message);
-      }
-    });
 
-    document.getElementById('form-expense').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      showError('expense-error', '');
-      const fd = new FormData(e.target);
-      const expenseDate = fd.get('expenseDate');
-      try {
-        await api('/expenses', {
-          method: 'POST',
-          body: JSON.stringify({
-            contractorName: 'Працівник',
-            amount: Number(fd.get('amount')),
-            description: fd.get('description'),
-            expenseDate: expenseDate ? String(expenseDate) : new Date().toISOString().slice(0, 10),
-          }),
+      document
+        .getElementById("form-expense")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          showError("expense-error", "");
+          const fd = new FormData(e.target);
+          const expenseDate = fd.get("expenseDate");
+          try {
+            await api("/expenses", {
+              method: "POST",
+              body: JSON.stringify({
+                contractorName: "Працівник",
+                amount: Number(fd.get("amount")),
+                description: fd.get("description"),
+                expenseDate: expenseDate
+                  ? String(expenseDate)
+                  : new Date().toISOString().slice(0, 10),
+              }),
+            });
+            e.target.reset();
+            await refresh();
+          } catch (err) {
+            showError("expense-error", err.message);
+          }
         });
-        e.target.reset();
-        await refresh();
-      } catch (err) {
-        showError('expense-error', err.message);
-      }
-    });
 
-    document.getElementById('form-category').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      showError('category-error', '');
-      const fd = new FormData(e.target);
-      try {
-        await api('/work-categories', {
-          method: 'POST',
-          body: JSON.stringify({
-            name: fd.get('name'),
-          }),
+      document
+        .getElementById("form-category")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          showError("category-error", "");
+          const fd = new FormData(e.target);
+          try {
+            await api("/work-categories", {
+              method: "POST",
+              body: JSON.stringify({
+                name: fd.get("name"),
+              }),
+            });
+            e.target.reset();
+            await loadCategories();
+          } catch (err) {
+            showError("category-error", err.message);
+          }
         });
-        e.target.reset();
-        await loadCategories();
-      } catch (err) {
-        showError('category-error', err.message);
-      }
-    });
 
-    document.getElementById('work-list').addEventListener('click', async (e) => {
-      const btn = e.target.closest('button[data-type="work"]');
-      if (!btn) return;
-      try {
-        await api('/work-records/' + btn.dataset.id, { method: 'DELETE' });
-        await refresh();
-      } catch (err) {
-        showError('work-error', err.message);
-      }
-    });
-    document.getElementById('expense-list').addEventListener('click', async (e) => {
-      const btn = e.target.closest('button[data-type="expense"]');
-      if (!btn) return;
-      try {
-        await api('/expenses/' + btn.dataset.id, { method: 'DELETE' });
-        await refresh();
-      } catch (err) {
-        showError('expense-error', err.message);
-      }
-    });
+      document
+        .getElementById("work-list")
+        .addEventListener("click", async (e) => {
+          const btn = e.target.closest('button[data-type="work"]');
+          if (!btn) return;
+          try {
+            await api("/work-records/" + btn.dataset.id, { method: "DELETE" });
+            await refresh();
+          } catch (err) {
+            showError("work-error", err.message);
+          }
+        });
+      document
+        .getElementById("expense-list")
+        .addEventListener("click", async (e) => {
+          const btn = e.target.closest('button[data-type="expense"]');
+          if (!btn) return;
+          try {
+            await api("/expenses/" + btn.dataset.id, { method: "DELETE" });
+            await refresh();
+          } catch (err) {
+            showError("expense-error", err.message);
+          }
+        });
 
-    loadCategories().then(refresh);
-  </script>
-</body>
+      loadCategories().then(refresh);
+    </script>
+  </body>
 </html>
