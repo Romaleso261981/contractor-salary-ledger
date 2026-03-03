@@ -234,7 +234,6 @@
             name="amountPaid"
             min="0"
             step="0.01"
-            required
             placeholder="0"
         /></label>
         <label
@@ -418,7 +417,10 @@
               <tr>
                 <td>${escapeHtml(r.description)}</td>
                 <td>${(r.categoryIds || []).join(", ")}</td>
-                <td class="amount">${formatMoney(r.amountPaid)} ${r.currency}</td>
+                <td class="amount">
+                  ${formatMoney(r.amountPaid || 0)} ${r.currency}
+                  <button data-id="${r.id}" data-type="edit-amount" style="margin-left: 0.5rem">✏️</button>
+                </td>
                 <td>${formatDate(r.workDate || r.createdAt)}</td>
                 <td><button class="danger" data-id="${r.id}" data-type="work">Видалити</button></td>
               </tr>
@@ -551,13 +553,49 @@
       document
         .getElementById("work-list")
         .addEventListener("click", async (e) => {
-          const btn = e.target.closest('button[data-type="work"]');
-          if (!btn) return;
-          try {
-            await api("/work-records/" + btn.dataset.id, { method: "DELETE" });
-            await refresh();
-          } catch (err) {
-            showError("work-error", err.message);
+          const deleteBtn = e.target.closest('button[data-type="work"]');
+          const editBtn = e.target.closest('button[data-type="edit-amount"]');
+
+          if (deleteBtn) {
+            try {
+              await api("/work-records/" + deleteBtn.dataset.id, {
+                method: "DELETE",
+              });
+              await refresh();
+            } catch (err) {
+              showError("work-error", err.message);
+            }
+            return;
+          }
+
+          if (editBtn) {
+            const currentCell = editBtn.closest("td");
+            const currentText = currentCell
+              ? currentCell.textContent || ""
+              : "";
+            const currentNumberMatch = currentText.replace(/[^\d.,-]/g, "");
+            const currentNumber = currentNumberMatch.replace(",", ".");
+
+            const input = window.prompt(
+              "Нова сума (грн)",
+              currentNumber || "0",
+            );
+            if (input === null) return;
+            const nextAmount = Number(input.replace(",", "."));
+            if (Number.isNaN(nextAmount) || nextAmount < 0) {
+              showError("work-error", "Невірна сума");
+              return;
+            }
+
+            try {
+              await api("/work-records/" + editBtn.dataset.id, {
+                method: "PATCH",
+                body: JSON.stringify({ amountPaid: nextAmount }),
+              });
+              await refresh();
+            } catch (err) {
+              showError("work-error", err.message);
+            }
           }
         });
       document

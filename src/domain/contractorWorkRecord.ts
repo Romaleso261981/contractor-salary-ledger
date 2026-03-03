@@ -4,7 +4,7 @@ export const contractorWorkRecordSchema = z.object({
   id: z.string(),
   contractorName: z.string().min(1),
   description: z.string().min(1),
-  amountPaid: z.number().nonnegative(),
+  amountPaid: z.number().nonnegative().optional().default(0),
   currency: z.string().min(1),
   categoryIds: z.array(z.string()),
   conditionsNotes: z.string().optional(),

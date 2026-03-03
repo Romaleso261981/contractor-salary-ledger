@@ -5,6 +5,7 @@ import {
   getAllRecords,
   createRecord,
   deleteRecord,
+  updateRecordAmount,
 } from '../storage/jsonFileStorage';
 import {
   getAllExpenses,
@@ -66,6 +67,30 @@ app.delete('/work-records/:id', async (req, res) => {
     res.status(500).json({
       error:
         error instanceof Error ? error.message : 'Failed to delete work record',
+    });
+  }
+});
+
+app.patch('/work-records/:id', async (req, res) => {
+  try {
+    const rawAmount = req.body?.amountPaid;
+    const amountNumber =
+      typeof rawAmount === 'number' ? rawAmount : Number(rawAmount);
+    if (Number.isNaN(amountNumber) || amountNumber < 0) {
+      res.status(400).json({ error: 'Invalid amount' });
+      return;
+    }
+    const updated = await updateRecordAmount(req.params.id, amountNumber);
+    if (!updated) {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error('PATCH /work-records/:id', error);
+    res.status(500).json({
+      error:
+        error instanceof Error ? error.message : 'Failed to update work record',
     });
   }
 });

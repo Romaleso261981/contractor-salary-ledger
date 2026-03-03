@@ -26,10 +26,16 @@ async function readAll(): Promise<ContractorWorkRecord[]> {
   if (!raw.trim()) return [];
   const parsed = JSON.parse(raw) as unknown;
   const array = Array.isArray(parsed) ? parsed : [];
-  return array
-    .map((item) => contractorWorkRecordSchema.safeParse(item))
-    .filter((r) => r.success)
-    .map((r) => r.data);
+
+  const validRecords: ContractorWorkRecord[] = [];
+  for (const item of array) {
+    const result = contractorWorkRecordSchema.safeParse(item);
+    if (result.success) {
+      validRecords.push(result.data);
+    }
+  }
+
+  return validRecords;
 }
 
 async function writeAll(
@@ -62,6 +68,25 @@ export async function createRecord(
   existing.push(record);
   await writeAll(existing);
   return record;
+}
+
+export async function updateRecordAmount(
+  id: string,
+  amountPaid: number
+): Promise<ContractorWorkRecord | null> {
+  const existing = await readAll();
+  const index = existing.findIndex((item) => item.id === id);
+  if (index === -1) return null;
+
+  const current = existing[index]!;
+  const next: ContractorWorkRecord = contractorWorkRecordSchema.parse({
+    ...current,
+    amountPaid,
+  });
+
+  existing[index] = next;
+  await writeAll(existing);
+  return next;
 }
 
 export async function deleteRecord(id: string): Promise<boolean> {
