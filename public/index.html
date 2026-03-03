@@ -194,22 +194,79 @@
     }
 
     async function loadSummary() {
-      const list = await api('/summary');
       const root = document.getElementById('summary');
+      const [workRecords, expenses] = await Promise.all([
+        api('/work-records'),
+        api('/expenses'),
+      ]);
+
+      const byContractor = {};
+
+      for (const record of workRecords) {
+        const contractorName = record.contractorName || 'Працівник';
+        let row = byContractor[contractorName];
+        if (!row) {
+          row = {
+            earnings: 0,
+            expenses: 0,
+            balance: 0,
+            currency: record.currency || 'UAH',
+          };
+          byContractor[contractorName] = row;
+        }
+        row.earnings += Number(record.amountPaid) || 0;
+      }
+
+      for (const expense of expenses) {
+        const contractorName = expense.contractorName || 'Працівник';
+        let row = byContractor[contractorName];
+        if (!row) {
+          row = { earnings: 0, expenses: 0, balance: 0, currency: 'UAH' };
+          byContractor[contractorName] = row;
+        }
+        row.expenses += Number(expense.amount) || 0;
+      }
+
+      const list = Object.entries(byContractor).map(
+        ([contractorName, data]) => {
+          const earnings = Number(data.earnings) || 0;
+          const expensesTotal = Number(data.expenses) || 0;
+          const balance = earnings - expensesTotal;
+          const currency = data.currency || 'UAH';
+          return {
+            contractorName,
+            earnings,
+            expenses: expensesTotal,
+            balance,
+            currency,
+          };
+        }
+      );
+
       if (!list.length) {
-        root.innerHTML = '<p class="loading">Немає даних. Додайте роботи або витрати.</p>';
+        root.innerHTML =
+          '<p class="loading">Немає даних. Додайте роботи або витрати.</p>';
         return;
       }
-      root.innerHTML = list.map(({ contractorName, earnings, expenses, balance, currency }) => {
-        const cls = balance >= 0 ? 'positive' : 'negative';
-        return `
+
+      root.innerHTML = list
+        .map(({ contractorName, earnings, expenses, balance, currency }) => {
+          const cls = balance >= 0 ? 'positive' : 'negative';
+          return `
           <div class="summary-card">
             <div class="name">${escapeHtml(contractorName)}</div>
-            <div class="row earnings">Заробіток: ${formatMoney(earnings)} ${currency}</div>
-            <div class="row expenses">Витрати: ${formatMoney(expenses)} ${currency}</div>
-            <div class="row balance ${cls}">Залишок: ${formatMoney(balance)} ${currency}</div>
+            <div class="row earnings">Заробіток: ${formatMoney(
+              earnings
+            )} ${currency}</div>
+            <div class="row expenses">Витрати: ${formatMoney(
+              expenses
+            )} ${currency}</div>
+            <div class="row balance ${cls}">Залишок: ${formatMoney(
+              balance
+            )} ${currency}</div>
           </div>`;
-      }).join('');
+        })
+        .join('');
     }
 
     async function loadWorkRecords() {
