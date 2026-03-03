@@ -1,0 +1,30 @@
+{
+  "name": "contractor-salary-ledger",
+  "version": "1.0.0",
+  "description": "Simple salary ledger for contractors: what was done, how much you paid, categories, and conditions — all stored in code-backed JSON.",
+  "main": "dist/api/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/api/server.ts",
+    "build": "tsc",
+    "start": "node dist/api/server.js"
+  },
+  "keywords": [
+    "contractor",
+    "salary",
+    "ledger"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3",
+    "zod": "^4.3.6"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

@@ -1,0 +1,36 @@
+---
+description: Use descriptive names for functions and parameters so it's clear what they are
+alwaysApply: true
+---
+
+# Descriptive Naming
+
+When writing functions and their parameters, use names that make the purpose obvious. Avoid short or cryptic letters.
+
+## Parameters and variables
+
+- Prefer full words or clear abbreviations over single letters (except very common cases like loop `index` or `i` in short loops).
+- Name parameters by their role: `productData`, `userId`, `requestBody`, not `data`, `id`, `body` unless the type alone makes it obvious in a tiny function.
+
+**Examples:**
+
+```typescript
+// ❌ Unclear
+function save(d) { ... }
+function handle(e) { ... }
+.map((x) => x.price)
+
+// ✅ Clear
+function saveProduct(productData: Product) { ... }
+function handleSubmitError(error: Error) { ... }
+.map((product) => product.price)
+```
+
+## Functions
+
+- Function names should describe the action and, when helpful, the subject: `getProductById`, `createProduct`, `stripUndefinedFromObject`.
+- Avoid vague names like `handle`, `process`, `doStuff` unless the file/scope makes the meaning obvious (e.g. `handleSubmit` in a form component).
+
+## Callbacks and inline functions
+
+- Prefer descriptive parameter names in callbacks: `(product)`, `(user)`, `(error)`, not `(p)`, `(u)`, `(e)` unless the callback is a one-liner and the type is obvious from context.

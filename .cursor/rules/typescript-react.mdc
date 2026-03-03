@@ -1,0 +1,13 @@
+---
+description: TypeScript and React conventions
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript & React
+
+- Use **functional components** and **hooks**. No class components.
+- Prefer **explicit props interfaces** (e.g. `ButtonProps`, `ProductCardProps`).
+- Use **'use client'** only when the module uses hooks, browser APIs, or event handlers. Keep server components default where possible.
+- Export types from slice index: `export type { X } from './model/types'`.
+- Use `cn()` from `@/shared/lib/cn` for conditional class names.

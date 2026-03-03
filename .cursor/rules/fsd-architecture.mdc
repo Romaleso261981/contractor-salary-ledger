@@ -1,0 +1,27 @@
+---
+description: Feature-Sliced Design (FSD) architecture and import rules
+alwaysApply: true
+---
+
+# FSD Architecture
+
+This project uses **Feature-Sliced Design** (FSD). Respect layer order and public API.
+
+## Layers (bottom → top)
+
+1. **shared** — UI kit, lib, config. No business logic. Reusable anywhere.
+2. **entities** — Business entities (Product, Category, Cart). Types + minimal UI (e.g. ProductCard).
+3. **features** — User actions (search, part-picker, add-to-cart). Use entities + shared.
+4. **widgets** — Composite blocks (Header, Footer, CatalogNav, ProductGrid). Use features + entities + shared.
+5. **views** — Full page compositions (HomePage, etc.). Use widgets, features, entities, shared. (Named "views" to avoid Next.js `pages` route conflict.)
+6. **app** — Next.js App Router (layout, routes, providers). Imports from views/widgets; routing only.
+
+## Rules
+
+- **Imports only downward**: e.g. `features` can import from `entities` and `shared`, not from `widgets` or `views`.
+- **Public API**: Each slice exposes only `index.ts` (re-export). Import from `@/entities/product`, not from `@/entities/product/ui/ProductCard`.
+- **Slices**: One folder per slice (e.g. `entities/product`, `features/search-catalog`). No cross-slice imports within the same layer.
+
+## Path alias
+
+- `@/*` → `./src/*` (e.g. `@/shared/ui`, `@/entities/product`, `@/widgets/Header`).
